@@ -1,54 +1,42 @@
-#include <stdio.h> 
-#include <stdlib.h>    
-#include <pthread.h>
-#include <limits.h>
-
-struct fib{
-    int n;
-    int arr[100000];
-};
-
-void* myThread(void *a){
-	
-	printf("Calculation in thread\n");
-	 struct fib *obj = ((struct fib *) a);
-
-	
-	if(obj->n==1)
+#include<pthread.h>
+#include<stdio.h>
+int goal=0;
+long fib[500];
+void *runner(void *param)
+{
+	if(goal<=0)
+		pthread_exit(0);
+	fib[0]=0;
+	if(goal>1)
 	{
-	    obj->arr[0]=0;
-	}
-	if(obj->n==2)
-	{
-	    obj->arr[0]=0;
-	    obj->arr[1]=1;
-	}
-	else{
-	   obj->arr[0]=0;
-	   obj->arr[1]=1;  
-	   int i;
-	for ( i=2; i<obj->n; i++){
-		obj->arr[i]=obj->arr[i-1]+obj->arr[i-2];
-	  }
+		fib[1]=1;
+		for(int i=2;i<goal;i++)
+			fib[i]=fib[i-1]+fib[i-2];
+		pthread_exit(0);
 	}
 }
-
-
-int main()
+int main(int argc, char *argv[])
 {
-    struct fib obj;
-    scanf("%d" , &obj.n);
-    
-    
-    pthread_t thread;
-    printf("Before thread\n");
-    pthread_create(&thread, NULL, myThread, &obj);
-    pthread_join(thread, NULL); 
-    printf("After thread\n");
-    for(int i =0;i<obj.n;i++)
-    {
-        printf("%d ", obj.arr[i]);
-    }
-    printf("\n");
-    return 0;
+	pthread_t tid;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	printf("Print this many Fibonacci numbers: ");
+	scanf("%d", &goal);
+	if(goal>500)
+	{
+		printf("Printing as many as possible: 500\n");
+		goal = 500;
+	}
+	pthread_create(&tid,&attr,runner,argv[1]);
+	pthread_join(tid, NULL);
+	if(goal>0)
+	{
+		printf("%ld", fib[0]);
+	}
+	for (int i=1;i<goal;i++)
+	{
+		printf(", %ld", fib[i]);
+	}
+	printf("\n");
+	return 0;
 }
